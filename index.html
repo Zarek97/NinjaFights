@@ -1,19 +1,87 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NinjaFights – Pobierz</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NinjaFights – Pobierz</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>NinjaFights</h1>
-        <p>Twoja epicka przygoda czeka!</p>
-        <a href="NinjaFights_beta.rar" download>
-            <button>Pobierz NinjaFights</button>
-        </a>
-        <p class="credit">by Kacper Żurek</p>
+  <div class="container">
+    <h1>NinjaFights</h1>
+    <p>Twoja epicka przygoda czeka!</p>
+
+    <div id="code-box" class="card">
+      <label for="code-input">Wprowadź kod dostępu</label>
+      <input id="code-input" placeholder="WPISZ-TUTAJ-KOD" />
+      <div class="row">
+        <button id="check-btn">Sprawdź kod</button>
+        <button id="paste-btn" title="Wklej ze schowka">Wklej</button>
+      </div>
+      <p id="msg" class="msg"></p>
     </div>
+
+    <a id="download-link" style="display:none" href="NinjaFights_beta.rar" download>
+      <button id="download-btn">Pobierz NinjaFights</button>
+    </a>
+
+    <p class="credit">by Kacper Żurek</p>
+  </div>
+
+<script>
+const ADMIN_CODE = "MASTER-ADMIN-1234"; // <- zamień na swój unikalny admin kod
+const CODES_FILE = "codes.json"; // plik w repo z tablicą kodów
+
+async function loadCodes(){
+  try{
+    const res = await fetch(CODES_FILE + "?t=" + Date.now());
+    if(!res.ok) throw new Error("Brak codes.json");
+    const data = await res.json();
+    return data.codes || [];
+  } catch(e){
+    return null; // brak pliku
+  }
+}
+
+document.getElementById('paste-btn').addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('code-input').value = text.trim();
+  } catch(e){
+    // ignore
+  }
+});
+
+document.getElementById('check-btn').addEventListener('click', async () => {
+  const code = document.getElementById('code-input').value.trim();
+  const msg = document.getElementById('msg');
+  msg.textContent = "";
+  if(!code){ msg.textContent = "Wpisz kod."; return; }
+
+  if(code === ADMIN_CODE){
+    // przekierowanie do admina
+    window.location.href = "admin.html";
+    return;
+  }
+
+  const codes = await loadCodes();
+  if(codes === null){
+    msg.textContent = "Brak pliku codes.json w repo. Skontaktuj się z administratorem.";
+    return;
+  }
+
+  // proste sprawdzenie
+  const found = codes.includes(code);
+  if(found){
+    // pokaz link do pobrania
+    document.getElementById('download-link').style.display = "inline-block";
+    msg.textContent = "Kod poprawny — kliknij Pobierz.";
+    // opcjonalnie schowaj input
+    document.getElementById('code-box').style.display = "none";
+  } else {
+    msg.textContent = "Nieprawidłowy kod.";
+  }
+});
+</script>
 </body>
 </html>
