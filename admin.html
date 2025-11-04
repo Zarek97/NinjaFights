@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin – NinjaFights (Generator kodów)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>NinjaFights — Panel admina</h1>
+    <p>Generuj kody dla graczy. Po wygenerowaniu skopiuj wynik i wrzuć do pliku <code>codes.json</code> w repo (root).</p>
+
+    <div class="card">
+      <label>Ile kodów wygenerować?</label>
+      <input id="count" type="number" min="1" max="500" value="10" />
+      <label>Długość jednego kodu</label>
+      <input id="len" type="number" min="6" max="32" value="12" />
+      <div class="row">
+        <button id="gen-btn">Generuj</button>
+        <button id="copy-btn">Kopiuj do schowka</button>
+      </div>
+      <p class="msg" id="admin-msg"></p>
+    </div>
+
+    <textarea id="out" rows="10" style="width:100%; margin-top:12px;"></textarea>
+
+    <h3>Instrukcja</h3>
+    <ol style="text-align:left">
+      <li>Wygeneruj kody.</li>
+      <li>Skopiuj wynik i stwórz/edytuj plik <code>codes.json</code> w repo (root).</li>
+      <li>Wklej tam zawartość i zacommituj. Przykład pliku poniżej.</li>
+    </ol>
+
+    <p class="credit">by Kacper Żurek</p>
+  </div>
+
+<script>
+function randStr(len){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez mylących znaków
+  let s = "";
+  for(let i=0;i<len;i++) s += chars.charAt(Math.floor(Math.random()*chars.length));
+  return s;
+}
+
+document.getElementById('gen-btn').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('count').value) || 0;
+  const L = parseInt(document.getElementById('len').value) || 8;
+  const out = [];
+  for(let i=0;i<n;i++){
+    out.push(randStr(L));
+  }
+  const json = { codes: out };
+  document.getElementById('out').value = JSON.stringify(json, null, 2);
+  document.getElementById('admin-msg').textContent = `Wygenerowano ${n} kodów.`;
+});
+
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const txt = document.getElementById('out').value;
+  if(!txt) return;
+  try {
+    await navigator.clipboard.writeText(txt);
+    document.getElementById('admin-msg').textContent = "Skopiowano do schowka. Wklej do pliku codes.json w repo.";
+  } catch(e){
+    document.getElementById('admin-msg').textContent = "Nie udało się skopiować do schowka.";
+  }
+});
+</script>
+</body>
+</html>
