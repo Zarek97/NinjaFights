@@ -7,34 +7,33 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>NinjaFights</h1>
-    <p>Twoja epicka przygoda czeka!</p>
+<div class="container">
+  <h1>NinjaFights</h1>
+  <p>Twoja epicka przygoda czeka!</p>
 
-    <div id="code-box" class="card">
-      <label for="code-input">Wprowadź kod dostępu</label>
-      <input id="code-input" placeholder="WPISZ-TUTAJ-KOD" />
-      <div class="row">
-        <button id="check-btn">Sprawdź kod</button>
-        <button id="paste-btn" title="Wklej ze schowka">Wklej</button>
-      </div>
-      <p id="msg" class="msg"></p>
+  <div id="code-box" class="card">
+    <label for="code-input">Wprowadź kod dostępu</label>
+    <input id="code-input" placeholder="WPISZ-TUTAJ-KOD" />
+    <div class="row">
+      <button id="check-btn">Sprawdź kod</button>
+      <button id="paste-btn" title="Wklej ze schowka">Wklej</button>
     </div>
-
-    <a id="download-link" style="display:none" href="NinjaFights_beta.rar" download>
-      <button id="download-btn">Pobierz NinjaFights</button>
-    </a>
-
-    <p class="credit">by Kacper Żurek</p>
+    <p id="msg" class="msg"></p>
   </div>
 
-<script>
-const ADMIN_CODE = "Haslo_Pro_gracz"; // kod admina
-let codes = []; // kody zostaną pobrane z pliku
+  <a id="download-link" style="display:none" href="NinjaFights_beta.rar" download>
+    <button id="download-btn">Pobierz NinjaFights</button>
+  </a>
 
-// wczytanie kodów
+  <p class="credit">by Kacper Żurek</p>
+</div>
+
+<script>
+const ADMIN_CODE = "Haslo_Pro_gracz";
+let codes = [];
+
 async function loadCodes(){
-  try {
+  try{
     const res = await fetch("codes.json?t=" + Date.now());
     if(!res.ok) throw new Error("Brak codes.json");
     const data = await res.json();
@@ -44,7 +43,6 @@ async function loadCodes(){
     codes = [];
   }
 }
-
 loadCodes();
 
 document.getElementById('paste-btn').addEventListener('click', async () => {
@@ -68,13 +66,10 @@ document.getElementById('check-btn').addEventListener('click', async () => {
 
   const index = codes.indexOf(code);
   if(index !== -1){
-    // poprawny kod
     document.getElementById('download-link').style.display = "inline-block";
     msg.textContent = "Kod poprawny — kliknij Pobierz.";
     document.getElementById('code-box').style.display = "none";
-
-    // usuń kod z listy (jednorazowy w sesji)
-    codes.splice(index, 1);
+    codes.splice(index, 1); // jednorazowy w sesji
   } else {
     msg.textContent = "Nieprawidłowy kod.";
   }
