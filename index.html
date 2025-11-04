@@ -29,27 +29,18 @@
   </div>
 
 <script>
-const ADMIN_CODE = "Haslo_Pro_gracz"; // <- zamień na swój unikalny admin kod
-const CODES_FILE = "codes.json"; // plik w repo z tablicą kodów
+const GITHUB_USER = "Zarek97";
+const REPO = "NinjaFights";
+const FILE_PATH = "codes.json";
+const TOKEN = "TWÓJ_TOKEN_TUTAJ"; // <-- wklej swój token GitHub
 
-async function loadCodes(){
-  try{
-    const res = await fetch(CODES_FILE + "?t=" + Date.now());
-    if(!res.ok) throw new Error("Brak codes.json");
-    const data = await res.json();
-    return data.codes || [];
-  } catch(e){
-    return null; // brak pliku
-  }
-}
+const ADMIN_CODE = "Haslo_Pro_gracz";
 
 document.getElementById('paste-btn').addEventListener('click', async () => {
   try {
     const text = await navigator.clipboard.readText();
     document.getElementById('code-input').value = text.trim();
-  } catch(e){
-    // ignore
-  }
+  } catch(e){}
 });
 
 document.getElementById('check-btn').addEventListener('click', async () => {
@@ -59,30 +50,32 @@ document.getElementById('check-btn').addEventListener('click', async () => {
   if(!code){ msg.textContent = "Wpisz kod."; return; }
 
   if(code === ADMIN_CODE){
-    // przekierowanie do admina
     window.location.href = "admin.html";
     return;
   }
 
-  const codes = await loadCodes();
-  if(codes === null){
-    msg.textContent = "Brak pliku codes.json w repo. Skontaktuj się z administratorem.";
-    return;
+  // pobierz obecne kody z GitHub
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${REPO}/contents/${FILE_PATH}`);
+    const data = await res.json();
+    const codes = JSON.parse(atob(data.content));
+    if(codes.includes(code)){
+      document.getElementById('download-link').style.display = "inline-block";
+      msg.textContent = "Kod poprawny — kliknij Pobierz.";
+      document.getElementById('code-box').style.display = "none";
+    } else {
+      msg.textContent = "Nieprawidłowy kod.";
+    }
+  } catch(e){
+    msg.textContent = "Błąd pobrania kodów!";
+    console.error(e);
   }
+});
+</script>
 
-  // proste sprawdzenie
-  const found = codes.includes(code);
-  if(found){
-    // pokaz link do pobrania
-    document.getElementById('download-link').style.display = "inline-block";
-    msg.textContent = "Kod poprawny — kliknij Pobierz.";
-    // opcjonalnie schowaj input
-    document.getElementById('code-box').style.display = "none";
-  } else {
-    msg.textContent = "Nieprawidłowy kod.";
-  }
 });
 </script>
 </body>
 </html>
+
 
