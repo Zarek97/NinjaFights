@@ -36,35 +36,43 @@
   </div>
 
 <script>
-function randStr(len){
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // bez mylących znaków
-  let s = "";
-  for(let i=0;i<len;i++) s += chars.charAt(Math.floor(Math.random()*chars.length));
-  return s;
+const GITHUB_USER = "Zarek97";
+const REPO = "NinjaFights";
+const FILE_PATH = "codes.json";
+const TOKEN = "TWÓJ_TOKEN_TUTAJ"; // <-- Wklej swój token tutaj
+
+async function generateCode() {
+  const code = "NF-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+  document.getElementById("generatedCodes").textContent = code;
+  
+  // Pobierz obecne kody z repo
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${REPO}/contents/${FILE_PATH}`);
+  const data = await res.json();
+  const oldCodes = JSON.parse(atob(data.content));
+  
+  // Dodaj nowy kod
+  oldCodes.push(code);
+  const updatedContent = btoa(JSON.stringify(oldCodes, null, 2));
+  
+  // Wyślij aktualizację do GitHuba
+  const updateRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `Add new code ${code}`,
+      content: updatedContent,
+      sha: data.sha
+    })
+  });
+  
+  if (updateRes.ok) {
+    alert("Kod został zapisany w GitHubie: " + code);
+  } else {
+    alert("Błąd zapisu kodu! Sprawdź konsolę.");
+    console.error(await updateRes.text());
+  }
 }
-
-document.getElementById('gen-btn').addEventListener('click', () => {
-  const n = parseInt(document.getElementById('count').value) || 0;
-  const L = parseInt(document.getElementById('len').value) || 8;
-  const out = [];
-  for(let i=0;i<n;i++){
-    out.push(randStr(L));
-  }
-  const json = { codes: out };
-  document.getElementById('out').value = JSON.stringify(json, null, 2);
-  document.getElementById('admin-msg').textContent = `Wygenerowano ${n} kodów.`;
-});
-
-document.getElementById('copy-btn').addEventListener('click', async () => {
-  const txt = document.getElementById('out').value;
-  if(!txt) return;
-  try {
-    await navigator.clipboard.writeText(txt);
-    document.getElementById('admin-msg').textContent = "Skopiowano do schowka. Wklej do pliku codes.json w repo.";
-  } catch(e){
-    document.getElementById('admin-msg').textContent = "Nie udało się skopiować do schowka.";
-  }
-});
 </script>
-</body>
-</html>
